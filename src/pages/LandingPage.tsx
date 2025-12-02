@@ -1,0 +1,893 @@
+import { useEffect, useState } from "react";
+import {
+    Heart,
+    BookOpen,
+    Users,
+    TrendingUp,
+    Building2,
+    Sparkles,
+    CheckCircle,
+    Phone,
+    FileText,
+    ArrowRight,
+} from "lucide-react";
+import { Helmet } from "react-helmet-async";
+import { supabase } from "../lib/supabaseClient";
+
+interface Agenda {
+    id: number;
+    title: string;
+    content: string;
+    slug: string;
+    image_url: string;
+    created_at: string;
+}
+
+interface DocumentationItem {
+    id: number;
+    title: string;
+    type: 'image' | 'video';
+    url: string;
+    created_at: string;
+}
+
+function LandingPage() {
+    const [agendas, setAgendas] = useState<Agenda[]>([]);
+    const [documentation, setDocumentation] = useState<DocumentationItem[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        fetchData();
+        trackPageView();
+    }, []);
+
+    const trackPageView = async () => {
+        try {
+            await supabase.from('page_views').insert([
+                {
+                    page_path: window.location.pathname,
+                    user_agent: navigator.userAgent
+                }
+            ]);
+        } catch (error) {
+            console.error('Error tracking page view:', error);
+        }
+    };
+
+    const fetchData = async () => {
+        await Promise.all([fetchAgendas(), fetchDocumentation()]);
+        setLoading(false);
+    };
+
+    const fetchDocumentation = async () => {
+        try {
+            const { data, error } = await supabase
+                .from("documentation_items")
+                .select("*")
+                .order("created_at", { ascending: false })
+                .limit(6);
+
+            if (error) throw error;
+            console.log('Fetched documentation:', data);
+            setDocumentation(data || []);
+        } catch (error) {
+            console.error("Error fetching documentation:", error);
+        }
+    };
+
+    const fetchAgendas = async () => {
+        try {
+            const { data, error } = await supabase
+                .from("agendas")
+                .select("*")
+                .order("created_at", { ascending: false })
+                .limit(4); // Limit to 4 latest agendas
+
+            if (error) throw error;
+            setAgendas(data || []);
+        } catch (error) {
+            console.error("Error fetching agendas:", error);
+        } finally {
+            // Loading handled in fetchData
+        }
+    };
+
+    const currentUrl = window.location.href;
+
+    return (
+        <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+            <Helmet>
+                <title>Surau Genesia - Pusat Peradaban Generasi Muda</title>
+                <meta
+                    name="description"
+                    content="Surau Genesia adalah pusat pendidikan, sosial, dan peradaban untuk melahirkan generasi Islami yang taat, cerdas, dan visioner. Mari dukung pembangunan Surau Genesia."
+                />
+                <meta
+                    name="keywords"
+                    content="Surau Genesia, Lampung Cerdas, donasi, wakaf, pembangunan masjid, generasi muda, Islam, pendidikan, sosial, peradaban"
+                />
+                <meta name="author" content="Surau Genesia - Lampung Cerdas" />
+                <link rel="canonical" href={currentUrl} />
+                <meta
+                    property="og:title"
+                    content="Surau Genesia - Pusat Peradaban Generasi Muda"
+                />
+                <meta
+                    property="og:description"
+                    content="Dukung pembangunan Surau Genesia untuk mencetak generasi taat, cerdas, dan visioner."
+                />
+                <meta property="og:url" content={currentUrl} />
+                <meta property="og:image" content={`${window.location.origin}/image/hero-bg.jpg`} />
+                <meta name="twitter:card" content="summary_large_image" />
+            </Helmet>
+            {/* Hero Section */}
+            <section
+                className="relative overflow-hidden text-white bg-center bg-cover"
+                style={{ backgroundImage: "url('/image/image2.jpg')" }}
+            >
+                <div className="absolute inset-0 bg-gradient-to-br from-teal-600/80 via-teal-700/80 to-cyan-800/80"></div>
+                <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDE2YzAtMi4yMS0xLjc5LTQtNC00cy00IDEuNzktNCA0IDEuNzkgNCA0IDQgNC0xLjc5IDQtNHptLTggMGMwLTIuMjEtMS43OS00LTQtNHMtNCAxLjc5LTQgNCAxLjc5IDQgNCA0IDQtMS43OSA0LTR6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-20"></div>
+
+                <nav className="container relative px-6 py-6 mx-auto">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-4">
+                            <img
+                                src="/Logo Surau Genesia.jpg"
+                                alt="Surau Genesia"
+                                className="w-16 h-16 border-2 border-white rounded-full shadow-lg"
+                            />
+                            <div>
+                                <h1 className="text-2xl font-bold">Surau Genesia</h1>
+                                <p className="text-sm text-teal-100">Lampung Cerdas</p>
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+
+                <div className="container relative px-6 py-20 pb-32 mx-auto">
+                    <div className="max-w-4xl mx-auto text-center">
+                        <div className="inline-flex items-center px-6 py-2 mb-8 space-x-2 border rounded-full bg-white/10 backdrop-blur-sm border-white/20">
+                            <Sparkles className="w-5 h-5 text-yellow-300" />
+                            <span className="text-sm font-medium">
+                                Pusat Peradaban Generasi Muda
+                            </span>
+                        </div>
+
+                        <h2 className="mb-6 text-5xl font-bold leading-tight md:text-6xl">
+                            Mencetak Generasi Taat,
+                            <br />
+                            Cerdas, dan Visioner
+                        </h2>
+
+                        <p className="mb-8 text-xl leading-relaxed text-teal-100 md:text-2xl">
+                            Dari Surau Kecil, Lahir Sejuta Pemimpin yang Taat, Cerdas, dan
+                            Visioner
+                        </p>
+
+                        <p className="max-w-3xl mx-auto mb-12 text-lg leading-relaxed text-teal-50">
+                            Bayangkan... di sebuah surau kecil, anak-anak muda belajar bukan
+                            hanya menghafal Al-Qur'an, tetapi juga belajar memimpin,
+                            berbicara, berpikir, dan berbuat baik untuk umat.
+                        </p>
+
+                        <a
+                            href="https://api.whatsapp.com/send/?phone=6289531170313&text=Assalamualaikum+Kak%2C+Saya+tertarik+untuk+berdonasi+di+Surau+Genesia."
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center px-10 py-5 space-x-2 text-lg font-bold text-white transition-all duration-300 rounded-full shadow-2xl bg-gradient-to-r from-green-400 to-emerald-500 hover:shadow-green-500/50 hover:scale-105 hover:from-green-500 hover:to-emerald-600"
+                        >
+                            <Heart className="w-6 h-6" />
+                            <span>DONASI SEKARANG</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div className="absolute bottom-0 left-0 right-0">
+                    <svg
+                        viewBox="0 0 1440 120"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                    >
+                        <path
+                            d="M0 120L60 110C120 100 240 80 360 70C480 60 600 60 720 65C840 70 960 80 1080 85C1200 90 1320 90 1380 90L1440 90V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z"
+                            fill="white"
+                        />
+                    </svg>
+                </div>
+            </section>
+
+            {/* About Section */}
+            <section className="py-20 bg-white">
+                <div className="container px-6 mx-auto">
+                    <div className="max-w-4xl mx-auto">
+                        <div className="mb-16 text-center">
+                            <h2 className="mb-6 text-4xl font-bold text-gray-800 md:text-5xl">
+                                Apa Itu Surau Genesia?
+                            </h2>
+                            <p className="text-xl leading-relaxed text-gray-600">
+                                Surau Genesia adalah ruang peradaban untuk membangun generasi
+                                muda Islami, mandiri, dan visioner. Bukan hanya tempat shalat,
+                                tapi tempat lahirnya pemimpin yang akan menebar cahaya
+                                perubahan.
+                            </p>
+                        </div>
+
+                        <div className="grid gap-8 mb-12 md:grid-cols-2">
+                            <div className="p-8 border border-teal-100 bg-gradient-to-br from-teal-50 to-cyan-50 rounded-2xl">
+                                <h3 className="mb-4 text-2xl font-bold text-teal-800">Surau</h3>
+                                <p className="leading-relaxed text-gray-700">
+                                    Simbol tempat ibadah, ruang ilmu, dan pusat pembinaan karakter
+                                </p>
+                            </div>
+                            <div className="p-8 border bg-gradient-to-br from-emerald-50 to-green-50 rounded-2xl border-emerald-100">
+                                <h3 className="mb-4 text-2xl font-bold text-emerald-800">
+                                    Genesia
+                                </h3>
+                                <p className="leading-relaxed text-gray-700">
+                                    Singkatan dari Generasi Emas Asia, generasi muda yang lahir
+                                    dari Lampung untuk Indonesia
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="p-10 text-white shadow-xl bg-gradient-to-r from-teal-600 to-cyan-700 rounded-2xl">
+                            <p className="text-xl italic font-medium leading-relaxed text-center md:text-2xl">
+                                "Surau Genesia bukan sekadar bangunan. Ia adalah investasi
+                                peradaban, tempat tumbuhnya generasi yang akan meneruskan
+                                kebaikan dan kepemimpinan Islam di masa depan."
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Vision & Mission */}
+            <section className="py-20 bg-gradient-to-br from-slate-50 to-teal-50">
+                <div className="container px-6 mx-auto">
+                    <div className="max-w-6xl mx-auto">
+                        <div className="grid gap-12 md:grid-cols-2">
+                            <div className="p-10 bg-white border border-teal-100 shadow-lg rounded-2xl">
+                                <div className="inline-flex items-center justify-center w-16 h-16 mb-6 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-xl">
+                                    <TrendingUp className="w-8 h-8 text-white" />
+                                </div>
+                                <h3 className="mb-6 text-3xl font-bold text-gray-800">Visi</h3>
+                                <p className="text-lg leading-relaxed text-gray-700">
+                                    Menjadi pusat pendidikan, sosial, dan peradaban yang
+                                    melahirkan generasi Islami, intelektual, dan berdaya
+                                    kepemimpinan global.
+                                </p>
+                            </div>
+
+                            <div className="p-10 bg-white border border-teal-100 shadow-lg rounded-2xl">
+                                <div className="inline-flex items-center justify-center w-16 h-16 mb-6 bg-gradient-to-br from-emerald-500 to-green-600 rounded-xl">
+                                    <CheckCircle className="w-8 h-8 text-white" />
+                                </div>
+                                <h3 className="mb-6 text-3xl font-bold text-gray-800">Misi</h3>
+                                <ul className="space-y-4">
+                                    {[
+                                        "Menumbuhkan karakter keislaman yang kuat pada generasi muda",
+                                        "Mengembangkan intelektualitas melalui pendidikan formal, non-formal, dan komunitas belajar",
+                                        "Membangun kepemimpinan, kemandirian, dan kepedulian sosial",
+                                        "Menjadi pusat sinergi kegiatan sosial, budaya, ekonomi, dan dakwah",
+                                        "Mengelola wakaf dan Baitulmal secara transparan untuk kebermanfaatan masyarakat",
+                                    ].map((item, index) => (
+                                        <li key={index} className="flex items-start space-x-3">
+                                            <CheckCircle className="flex-shrink-0 w-5 h-5 mt-1 text-green-500" />
+                                            <span className="leading-relaxed text-gray-700">
+                                                {item}
+                                            </span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Core Values */}
+            <section className="py-20 bg-white">
+                <div className="container px-6 mx-auto">
+                    <div className="max-w-4xl mx-auto mb-16 text-center">
+                        <h2 className="mb-6 text-4xl font-bold text-gray-800 md:text-5xl">
+                            Misi Kami: Mencetak Sejuta Pemimpin Masa Depan
+                        </h2>
+                        <p className="text-xl text-gray-600">
+                            Anak-anak muda yang tumbuh dengan nilai-nilai inti
+                        </p>
+                    </div>
+
+                    <div className="grid max-w-5xl gap-8 mx-auto md:grid-cols-3">
+                        {[
+                            {
+                                icon: "🕋",
+                                title: "Taat",
+                                description: "Kepada Allah SWT dan nilai-nilai Islam",
+                                color: "from-teal-500 to-cyan-600",
+                            },
+                            {
+                                icon: "📚",
+                                title: "Cerdas",
+                                description: "Intelektual, kreatif, berilmu",
+                                color: "from-blue-500 to-indigo-600",
+                            },
+                            {
+                                icon: "🚀",
+                                title: "Visioner",
+                                description: "Kepemimpinan yang membawa perubahan positif",
+                                color: "from-emerald-500 to-green-600",
+                            },
+                        ].map((value, index) => (
+                            <div
+                                key={index}
+                                className="p-8 transition-all duration-300 bg-white border-2 border-gray-100 shadow-lg rounded-2xl hover:border-teal-300 hover:shadow-2xl hover:-translate-y-2"
+                            >
+                                <div
+                                    className={`inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br ${value.color} rounded-2xl mb-6 text-4xl shadow-lg`}
+                                >
+                                    {value.icon}
+                                </div>
+                                <h3 className="mb-3 text-2xl font-bold text-gray-800">
+                                    {value.title}
+                                </h3>
+                                <p className="leading-relaxed text-gray-600">
+                                    {value.description}
+                                </p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* Functions */}
+            <section className="py-20 bg-gradient-to-br from-slate-50 via-teal-50 to-cyan-50">
+                <div className="container px-6 mx-auto">
+                    <div className="max-w-4xl mx-auto mb-16 text-center">
+                        <h2 className="mb-6 text-4xl font-bold text-gray-800 md:text-5xl">
+                            Fungsi Surau Genesia
+                        </h2>
+                        <p className="text-xl text-gray-600">
+                            Pusat peradaban yang melayani berbagai kebutuhan generasi muda
+                        </p>
+                    </div>
+
+                    <div className="grid max-w-6xl gap-6 mx-auto md:grid-cols-2 lg:grid-cols-3">
+                        {[
+                            {
+                                icon: Building2,
+                                title: "Mushola & Ruang Ibadah",
+                                description:
+                                    "Terbuka untuk umum, tempat mendekatkan diri kepada Allah SWT",
+                                gradient: "from-teal-500 to-cyan-600",
+                            },
+                            {
+                                icon: BookOpen,
+                                title: "Rumahnya Penghafal Qur'an",
+                                description:
+                                    "Program untuk mendidik anak muda bisa baca, paham dan mengamalkan Al-Qur'an",
+                                gradient: "from-emerald-500 to-green-600",
+                            },
+                            {
+                                icon: Users,
+                                title: "Pusat Pendidikan & Pelatihan",
+                                description: "Kelas kepemimpinan, tahfidz, kajian, dan kursus",
+                                gradient: "from-blue-500 to-cyan-600",
+                            },
+                            {
+                                icon: TrendingUp,
+                                title: "Youth & Leadership Hub",
+                                description:
+                                    "Pelatihan soft skill, kewirausahaan, dan digital skill",
+                                gradient: "from-orange-500 to-red-600",
+                            },
+                            {
+                                icon: Heart,
+                                title: "Baitulmal Center",
+                                description:
+                                    "Pengelolaan zakat, infaq, wakaf, dan program sosial",
+                                gradient: "from-pink-500 to-rose-600",
+                            },
+                            {
+                                icon: Sparkles,
+                                title: "Cultural & Social Space",
+                                description: "Kegiatan budaya, literasi, dan seni Islami",
+                                gradient: "from-purple-500 to-indigo-600",
+                            },
+                        ].map((func, index) => (
+                            <div
+                                key={index}
+                                className="p-8 transition-all duration-300 bg-white border border-gray-100 shadow-lg rounded-2xl hover:shadow-2xl hover:-translate-y-1"
+                            >
+                                <div
+                                    className={`inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br ${func.gradient} rounded-xl mb-5 shadow-lg`}
+                                >
+                                    <func.icon className="text-white w-7 h-7" />
+                                </div>
+                                <h3 className="mb-3 text-xl font-bold text-gray-800">
+                                    {func.title}
+                                </h3>
+                                <p className="leading-relaxed text-gray-600">
+                                    {func.description}
+                                </p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* Documentation Section */}
+            <section className="py-20 bg-white">
+                <div className="container px-6 mx-auto">
+                    <div className="max-w-6xl mx-auto">
+                        <div className="mb-16 text-center">
+                            <div className="inline-flex items-center px-6 py-2 mb-6 space-x-2 rounded-full bg-gradient-to-r from-teal-100 to-cyan-100">
+                                <Sparkles className="w-5 h-5 text-teal-600" />
+                                <span className="text-sm font-semibold text-teal-700">
+                                    Progress Pembangunan
+                                </span>
+                            </div>
+                            <h2 className="mb-6 text-4xl font-bold text-gray-800 md:text-5xl">
+                                Dokumentasi & Progres
+                            </h2>
+                            <p className="text-xl text-gray-600">
+                                Saksikan perjalanan pembangunan Surau Genesia melalui gambar dan
+                                video
+                            </p>
+                        </div>
+
+                        {/* Documentation Gallery Section (Images) */}
+                        <div className="mb-16">
+                            <h3 className="mb-8 text-2xl font-bold text-center text-gray-800">
+                                Agenda
+                            </h3>
+                            {documentation.filter(i => i.type === 'image').length > 0 ? (
+                                <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
+                                    {documentation.filter(i => i.type === 'image').map((item) => (
+                                        <div key={item.id} className="bg-white rounded-2xl shadow-lg overflow-hidden group">
+                                            <div className="aspect-video relative">
+                                                <img
+                                                    src={item.url}
+                                                    alt={item.title}
+                                                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                                />
+                                            </div>
+                                            {item.title && (
+                                                <div className="p-4">
+                                                    <h4 className="font-bold text-gray-800 mb-1">{item.title}</h4>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="text-center py-8 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+                                    <p className="text-gray-500">Belum ada foto dokumentasi.</p>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Building Plan Section */}
+                        <div className="mb-16">
+                            <h3 className="mb-8 text-2xl font-bold text-center text-gray-800">
+                                Rencana Pembangunan
+                            </h3>
+                            <div className="flex flex-col items-center gap-8 md:flex-row">
+                                <div className="w-full md:w-1/2">
+                                    <img
+                                        src="/image/plan bangungan.jpg"
+                                        alt="Rencana Pembangunan Surau Genesia"
+                                        className="object-cover w-full shadow-lg rounded-2xl"
+                                    />
+                                </div>
+                                <div className="w-full text-center text-gray-700 md:w-1/2 md:text-left">
+                                    <p className="mb-4 text-lg leading-relaxed">
+                                        Ini adalah desain final dari Surau Genesia yang akan kita
+                                        bangun bersama. Sebuah bangunan modern yang akan menjadi
+                                        pusat peradaban, pendidikan, dan kegiatan sosial bagi
+                                        generasi muda di Lampung.
+                                    </p>
+                                    <p className="text-lg leading-relaxed">
+                                        Setiap detailnya dirancang untuk menciptakan lingkungan yang
+                                        nyaman dan inspiratif untuk belajar, beribadah, dan
+                                        berkarya.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Video Documentation Section */}
+                        <div className="mb-12">
+                            <h3 className="mb-8 text-2xl font-bold text-center text-gray-800">
+                                Video Dokumentasi
+                            </h3>
+                            {documentation.filter(i => i.type === 'video').length > 0 ? (
+                                <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+                                    {documentation.filter(i => i.type === 'video').map((item) => (
+                                        <div key={item.id} className="bg-white rounded-2xl shadow-lg overflow-hidden">
+                                            <div className="aspect-video relative">
+                                                <video
+                                                    src={item.url}
+                                                    className="w-full h-full object-cover"
+                                                    controls
+                                                />
+                                            </div>
+                                            {item.title && (
+                                                <div className="p-4">
+                                                    <h4 className="font-bold text-gray-800 mb-1">{item.title}</h4>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="text-center py-8 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+                                    <p className="text-gray-500">Belum ada video dokumentasi.</p>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Progress Stats */}
+                        <div className="p-10 border-2 border-teal-100 bg-gradient-to-br from-teal-50 to-cyan-50 rounded-2xl">
+                            <h3 className="mb-8 text-2xl font-bold text-center text-gray-800">
+                                Progress Pembangunan Saat Ini
+                            </h3>
+                            <div className="grid gap-8 md:grid-cols-3">
+                                <div className="text-center">
+                                    <div className="inline-flex items-center justify-center w-16 h-16 mb-4 shadow-lg bg-gradient-to-br from-teal-500 to-cyan-600 rounded-xl">
+                                        <Building2 className="w-8 h-8 text-white" />
+                                    </div>
+                                    <h4 className="mb-2 text-lg font-bold text-gray-800">
+                                        Lokasi
+                                    </h4>
+                                    <p className="text-gray-600">
+                                        Gg. Sawah Baru, Kp. Baru, Kec. Kedaton, Kota Bandar Lampung,
+                                        Lampung 35141
+                                    </p>
+                                </div>
+                                <div className="text-center">
+                                    <div className="inline-flex items-center justify-center w-16 h-16 mb-4 shadow-lg bg-gradient-to-br from-emerald-500 to-green-600 rounded-xl">
+                                        <TrendingUp className="w-8 h-8 text-white" />
+                                    </div>
+                                    <h4 className="mb-2 text-lg font-bold text-gray-800">
+                                        Tahap
+                                    </h4>
+                                    <p className="text-gray-600">Persiapan Pembangunan</p>
+                                </div>
+                                <div className="text-center">
+                                    <div className="inline-flex items-center justify-center w-16 h-16 mb-4 shadow-lg bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl">
+                                        <Heart className="w-8 h-8 text-white" />
+                                    </div>
+                                    <h4 className="mb-2 text-lg font-bold text-gray-800">
+                                        Target Donasi
+                                    </h4>
+                                    <p className="text-gray-600">Rp 1 Miliar</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Agenda / Public Reports Section */}
+            <section className="py-20 bg-slate-50">
+                <div className="container px-6 mx-auto">
+                    <div className="max-w-6xl mx-auto">
+                        <div className="text-center mb-12">
+                            <div className="inline-flex items-center px-6 py-2 mb-6 space-x-2 rounded-full bg-blue-100">
+                                <FileText className="w-5 h-5 text-blue-600" />
+                                <span className="text-sm font-semibold text-blue-700">
+                                    Agenda & Berita
+                                </span>
+                            </div>
+                            <h2 className="text-3xl font-bold text-gray-800 mb-4">
+                                Agenda Terkini
+                            </h2>
+                            <p className="text-gray-600">
+                                Ikuti kegiatan dan perkembangan terbaru dari Surau Genesia.
+                            </p>
+                        </div>
+
+                        {loading ? (
+                            <div className="text-center py-12">
+                                <p className="text-gray-500">Memuat agenda...</p>
+                            </div>
+                        ) : agendas.length > 0 ? (
+                            <>
+                                <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 mb-12">
+                                    {agendas.slice(0, 3).map((agenda) => (
+                                        <div
+                                            key={agenda.id}
+                                            className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow overflow-hidden flex flex-col"
+                                        >
+                                            <div className="h-48 bg-gray-200 relative">
+                                                {agenda.image_url ? (
+                                                    <img
+                                                        src={agenda.image_url}
+                                                        alt={agenda.title}
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                                        <Sparkles className="w-12 h-12" />
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="p-6 flex-1 flex flex-col">
+                                                <h3 className="text-xl font-bold text-gray-800 mb-3 line-clamp-2">
+                                                    {agenda.title}
+                                                </h3>
+                                                <div
+                                                    className="text-gray-600 text-sm mb-4 line-clamp-3 prose prose-sm"
+                                                    dangerouslySetInnerHTML={{ __html: agenda.content }}
+                                                />
+                                                <div className="mt-auto pt-4 border-t border-gray-100 flex justify-between items-center">
+                                                    <span className="text-xs text-gray-500">
+                                                        {new Date(agenda.created_at).toLocaleDateString(
+                                                            "id-ID",
+                                                            {
+                                                                day: "numeric",
+                                                                month: "long",
+                                                                year: "numeric",
+                                                            }
+                                                        )}
+                                                    </span>
+                                                    <a href={`/agenda/${agenda.slug}`} className="text-teal-600 hover:text-teal-700 text-sm font-medium flex items-center">
+                                                        Baca Selengkapnya{" "}
+                                                        <ArrowRight className="w-4 h-4 ml-1" />
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div className="text-center">
+                                    <a
+                                        href="/agenda"
+                                        className="inline-flex items-center px-8 py-3 text-lg font-semibold text-white transition-all duration-300 bg-teal-600 rounded-full hover:bg-teal-700 hover:shadow-lg hover:-translate-y-1"
+                                    >
+                                        Lihat Lebih Banyak
+                                        <ArrowRight className="w-5 h-5 ml-2" />
+                                    </a>
+                                </div>
+                            </>
+                        ) : (
+                            <div className="text-center py-12 bg-white rounded-xl shadow-sm border border-gray-100">
+                                <p className="text-gray-500">Belum ada agenda terbaru.</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </section>
+
+            {/* Hadith Section */}
+            <section className="relative py-20 overflow-hidden text-white bg-gradient-to-br from-teal-600 via-teal-700 to-cyan-800">
+                <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDE2YzAtMi4yMS0xLjc5LTQtNC00cy00IDEuNzktNCA0IDEuNzkgNCA0IDQgNC0xLjc5IDQtNHptLTggMGMwLTIuMjEtMS43OS00LTQtNHMtNCAxLjc5LTQgNCAxLjc5IDQgNCA0IDQtMS43OSA0LTR6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-20"></div>
+
+                <div className="container relative z-10 px-6 mx-auto">
+                    <div className="max-w-4xl mx-auto">
+                        <div className="mb-12 text-center">
+                            <h2 className="mb-8 text-4xl font-bold md:text-5xl">
+                                Mengapa Kami Butuh Dukungan Anda
+                            </h2>
+                        </div>
+
+                        <div className="p-10 border bg-white/10 backdrop-blur-sm border-white/20 rounded-2xl md:p-12">
+                            <div className="mb-8">
+                                <p className="mb-8 font-serif text-2xl italic leading-relaxed text-center md:text-3xl">
+                                    "Apabila manusia meninggal dunia, maka terputuslah amalnya
+                                    kecuali tiga: sedekah jariyah, ilmu yang bermanfaat, dan anak
+                                    saleh yang mendoakannya."
+                                </p>
+                                <p className="text-lg text-center text-teal-100">
+                                    (HR. Muslim)
+                                </p>
+                            </div>
+
+                            <div className="space-y-6 text-lg leading-relaxed">
+                                <p>
+                                    Setiap <strong>batu bata, cat, karpet, dan lantai</strong>{" "}
+                                    yang Anda bantu bangun, akan menjadi{" "}
+                                    <strong>pahala jariyah yang terus mengalir</strong>.
+                                </p>
+                                <p>
+                                    Dengan mendukung pembangunan Surau Genesia, Anda sedang
+                                    menanam pohon kebaikan yang buahnya akan terus mengalir hingga
+                                    akhir hayat.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Donation Section */}
+            <section id="donasi" className="py-20 bg-white">
+                <div className="container px-6 mx-auto">
+                    <div className="max-w-4xl mx-auto">
+                        <div className="mb-16 text-center">
+                            <div className="inline-flex items-center px-6 py-2 mb-6 space-x-2 rounded-full bg-gradient-to-r from-green-100 to-emerald-100">
+                                <Heart className="w-5 h-5 text-green-600" />
+                                <span className="text-sm font-semibold text-green-700">
+                                    Mari Berkontribusi
+                                </span>
+                            </div>
+                            <h2 className="mb-6 text-4xl font-bold text-gray-800 md:text-5xl">
+                                Bagaimana Anda Bisa Berkontribusi
+                            </h2>
+                            <p className="text-xl text-gray-600">
+                                Setiap rupiah Anda adalah cahaya, setiap dukungan Anda adalah
+                                amal yang hidup selamanya
+                            </p>
+                        </div>
+
+                        <div className="mb-12">
+                            <img
+                                src="/image/donasi.jpg"
+                                alt="Donasi Surau Genesia"
+                                className="w-full shadow-lg rounded-2xl"
+                            />
+                        </div>
+
+                        <div className="grid gap-8 mb-12 md:grid-cols-2">
+                            <div className="p-8 border-2 border-green-200 shadow-lg bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl">
+                                <div className="inline-flex items-center justify-center w-16 h-16 mb-6 shadow-lg bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl">
+                                    <Heart className="w-8 h-8 text-white" />
+                                </div>
+                                <h3 className="mb-4 text-2xl font-bold text-gray-800">
+                                    Donasi Tunai / Transfer
+                                </h3>
+                                <div className="space-y-3 text-gray-700">
+                                    <p className="font-semibold">Bank Syariah Indonesia</p>
+                                    <p>a.n. Baitul Maal Lampung Cerdas</p>
+                                    <p className="px-4 py-3 font-mono font-bold text-white bg-green-500 border border-green-200 rounded-lg">
+                                        7328070116
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="p-8 border-2 border-teal-200 shadow-lg bg-gradient-to-br from-teal-50 to-cyan-50 rounded-2xl">
+                                <div className="inline-flex items-center justify-center w-16 h-16 mb-6 shadow-lg bg-gradient-to-br from-teal-500 to-cyan-600 rounded-xl">
+                                    <Building2 className="w-8 h-8 text-white" />
+                                </div>
+                                <h3 className="mb-4 text-2xl font-bold text-gray-800">
+                                    Wakaf Tunai / Material
+                                </h3>
+                                <div className="space-y-4 text-gray-700">
+                                    <p>Hubungi kami di whatsapp:</p>
+                                    <div className="space-y-3">
+                                        <div className="flex items-center px-4 py-3 space-x-3 text-black bg-red-500 border border-teal-200 rounded-lg">
+                                            <Phone className="w-5 h-5" />
+                                            <span className="font-bold">089531170313</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="p-8 mb-12 border-2 bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200 rounded-2xl">
+                            <h3 className="mb-4 text-2xl font-bold text-gray-800">
+                                Transparansi & Akuntabilitas
+                            </h3>
+                            <p className="mb-6 leading-relaxed text-gray-700">
+                                Kami berkomitmen menjaga transparansi & laporan berkala setiap
+                                donasi:
+                            </p>
+                            <div className="grid gap-4 md:grid-cols-3">
+                                {[
+                                    "Laporan keuangan mingguan",
+                                    "Dokumentasi progress",
+                                    "Publikasi kegiatan sosial",
+                                ].map((item, index) => (
+                                    <div
+                                        key={index}
+                                        className="flex items-center p-4 space-x-3 bg-white rounded-xl"
+                                    >
+                                        <CheckCircle className="flex-shrink-0 w-5 h-5 text-green-500" />
+                                        <span className="font-medium text-gray-700">{item}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="text-center">
+                            <a
+                                href="https://api.whatsapp.com/send/?phone=6289531170313&text=Assalamualaikum+Kak%2C+Saya+tertarik+untuk+berdonasi+di+Surau+Genesia."
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center px-12 py-6 space-x-3 text-xl font-bold text-white transition-all duration-300 rounded-full shadow-2xl bg-gradient-to-r from-green-400 to-emerald-500 hover:shadow-green-500/50 hover:scale-105 hover:from-green-500 hover:to-emerald-600"
+                            >
+                                <Heart className="w-7 h-7" />
+                                <span>DONASI SEKARANG</span>
+                            </a>
+                            <p className="mt-6 text-lg text-gray-600">
+                                Klik tombol di atas dan jadilah bagian dari sejarah kebaikan!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Final CTA */}
+            <section className="relative py-20 overflow-hidden text-white bg-gradient-to-br from-teal-600 via-emerald-600 to-green-700">
+                <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDE2YzAtMi4yMS0xLjc5LTQtNC00cy00IDEuNzktNCA0IDEuNzkgNCA0IDQgNC0xLjc5IDQtNHptLTggMGMwLTIuMjEtMS43OS00LTQtNHMtNCAxLjc5LTQgNCAxLjc5IDQgNCA0IDQtMS43OSA0LTR6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-20"></div>
+
+                <div className="container relative z-10 px-6 mx-auto">
+                    <div className="max-w-4xl mx-auto text-center">
+                        <Sparkles className="w-16 h-16 mx-auto mb-8 text-yellow-300" />
+                        <h2 className="mb-8 text-4xl font-bold leading-tight md:text-5xl">
+                            Mari Bersama Membangun
+                            <br />
+                            Surau Genesia
+                        </h2>
+                        <p className="mb-8 text-2xl font-light leading-relaxed md:text-3xl">
+                            Karena setiap langkah kecil Anda,
+                            <br />
+                            akan menjadi pijakan besar bagi lahirnya sejuta pemimpin masa
+                            depan
+                        </p>
+                        <div className="inline-flex items-center px-8 py-4 space-x-3 border bg-white/10 backdrop-blur-sm border-white/20 rounded-2xl">
+                            <Sparkles className="w-6 h-6 text-yellow-300" />
+                            <p className="text-xl italic font-medium">
+                                "Dari Surau kecil, lahir sejuta pemimpin masa depan."
+                            </p>
+                            <Sparkles className="w-6 h-6 text-yellow-300" />
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Map Section */}
+            <section className="py-20 bg-white">
+                <div className="container px-6 mx-auto">
+                    <div className="max-w-4xl mx-auto text-center">
+                        <h2 className="mb-10 text-4xl font-bold text-gray-800 md:text-5xl">
+                            Lokasi Kami
+                        </h2>
+                        <div className="overflow-hidden shadow-2xl rounded-2xl">
+                            <iframe
+                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3594.7882692146472!2d105.24633949999999!3d-5.360317500000001!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e40c56486d8e83d%3A0x4f3f6f0980e66843!2sLampung%20Cerdas%20Office!5e1!3m2!1sid!2sid!4v1760513804826!5m2!1sid!2sid"
+                                width="100%"
+                                height="450"
+                                style={{ border: 0 }}
+                                loading="lazy"
+                                referrerPolicy="no-referrer-when-downgrade"
+                            ></iframe>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Footer */}
+            <footer className="py-12 text-white bg-gray-900">
+                <div className="container px-6 mx-auto">
+                    <div className="max-w-4xl mx-auto text-center">
+                        <div className="flex items-center justify-center mb-6 space-x-4">
+                            <img
+                                src="/Logo Surau Genesia.jpg"
+                                alt="Surau Genesia"
+                                className="w-12 h-12 rounded-full"
+                            />
+                            <div className="text-left">
+                                <h3 className="text-xl font-bold">Surau Genesia</h3>
+                                <p className="text-sm text-gray-400">Lampung Cerdas</p>
+                            </div>
+                        </div>
+                        <p className="mb-1 text-gray-400">
+                            Pusat peradaban generasi muda yang taat, cerdas, dan visioner
+                        </p>
+                        <p className="mb-4 text-gray-400">
+                            Gg. Sawah Baru, Kp. Baru, Kec. Kedaton, Kota Bandar Lampung,
+                            Lampung 35141
+                        </p>
+                        <p className="text-sm text-gray-500">
+                            © 2025 Surau Genesia. Dikelola oleh Lampung Cerdas.
+                        </p>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    );
+}
+
+export default LandingPage;
