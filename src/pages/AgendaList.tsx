@@ -13,6 +13,8 @@ interface Agenda {
     created_at: string;
 }
 
+import PublicNavbar from "../components/PublicNavbar";
+
 const AgendaList = () => {
     const [agendas, setAgendas] = useState<Agenda[]>([]);
     const [loading, setLoading] = useState(true);
@@ -51,6 +53,8 @@ const AgendaList = () => {
                 <meta property="og:image" content={`${window.location.origin}/image/hero-bg.jpg`} />
                 <meta name="twitter:card" content="summary_large_image" />
             </Helmet>
+
+            <PublicNavbar />
 
             {/* Header */}
             <div className="bg-teal-600 text-white py-12">

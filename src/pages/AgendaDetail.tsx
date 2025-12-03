@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { supabase } from "../lib/supabaseClient";
 import { ArrowLeft, Calendar, Sparkles, Clock, Share2 } from "lucide-react";
 import { Helmet } from "react-helmet-async";
+import PublicNavbar from "../components/PublicNavbar";
 
 interface Agenda {
     id: number;
@@ -71,6 +72,8 @@ const AgendaDetail = () => {
     const plainTextDescription = agenda.content.replace(/<[^>]+>/g, '').substring(0, 160);
     const currentUrl = window.location.href;
 
+
+
     return (
         <div className="min-h-screen bg-slate-50 pb-20">
             <Helmet>
@@ -83,6 +86,8 @@ const AgendaDetail = () => {
                 <meta property="og:url" content={currentUrl} />
                 <meta name="twitter:card" content="summary_large_image" />
             </Helmet>
+
+            <PublicNavbar />
 
             {/* Header Image */}
             <div className="h-[400px] w-full relative bg-gray-900">
@@ -128,7 +133,7 @@ const AgendaDetail = () => {
             </div>
 
             {/* Content */}
-            <div className="container mx-auto px-6 -mt-10 relative z-10">
+            <div className="container mx-auto px-6 mt-10 relative z-10">
                 <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12 max-w-4xl mx-auto">
                     <div
                         className="prose prose-lg max-w-none prose-headings:text-gray-800 prose-p:text-gray-600 prose-a:text-teal-600 hover:prose-a:text-teal-700"
