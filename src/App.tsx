@@ -5,6 +5,7 @@ import AdminLayout from "./layouts/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AgendaManager from "./pages/admin/AgendaManager";
 import DocumentationManager from "./pages/admin/DocumentationManager";
+import SiteSettingsManager from "./pages/admin/SiteSettingsManager";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AgendaList from "./pages/AgendaList";
 import AgendaDetail from "./pages/AgendaDetail";
@@ -31,6 +32,7 @@ function App() {
 					<Route index element={<AdminDashboard />} />
 					<Route path="agenda" element={<AgendaManager />} />
 					<Route path="documentation" element={<DocumentationManager />} />
+					<Route path="settings" element={<SiteSettingsManager />} />
 				</Route>
 			</Routes>
 		</Router>

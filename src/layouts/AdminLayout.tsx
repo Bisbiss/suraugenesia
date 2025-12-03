@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Calendar, LogOut, Image } from "lucide-react";
+import { LayoutDashboard, Calendar, LogOut, Image, Settings } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
 import { useEffect, useState } from "react";
 import { User } from "@supabase/supabase-js";
@@ -56,6 +56,14 @@ const AdminLayout = () => {
                     >
                         <Image className="w-5 h-5" />
                         <span>Documentation</span>
+                    </Link>
+
+                    <Link
+                        to="/admin/settings"
+                        className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${isActive('/admin/settings')}`}
+                    >
+                        <Settings className="w-5 h-5" />
+                        <span>Pengaturan</span>
                     </Link>
                 </nav>
 

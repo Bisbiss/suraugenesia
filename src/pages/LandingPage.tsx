@@ -31,9 +31,26 @@ interface DocumentationItem {
     created_at: string;
 }
 
+interface SiteSettings {
+    phone: string;
+    email: string;
+    address: string;
+    bank_name: string;
+    bank_number: string;
+    bank_holder: string;
+    vision: string;
+    mission: string;
+    logo_url: string;
+    pamphlet_url: string;
+    instagram_url: string;
+    facebook_url: string;
+    youtube_url: string;
+}
+
 function LandingPage() {
     const [agendas, setAgendas] = useState<Agenda[]>([]);
     const [documentation, setDocumentation] = useState<DocumentationItem[]>([]);
+    const [settings, setSettings] = useState<SiteSettings | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -55,8 +72,22 @@ function LandingPage() {
     };
 
     const fetchData = async () => {
-        await Promise.all([fetchAgendas(), fetchDocumentation()]);
+        await Promise.all([fetchAgendas(), fetchDocumentation(), fetchSettings()]);
         setLoading(false);
+    };
+
+    const fetchSettings = async () => {
+        try {
+            const { data, error } = await supabase
+                .from('site_settings')
+                .select('*')
+                .single();
+
+            if (error) throw error;
+            setSettings(data);
+        } catch (error) {
+            console.error('Error fetching settings:', error);
+        }
     };
 
     const fetchDocumentation = async () => {
@@ -123,7 +154,7 @@ function LandingPage() {
             {/* Hero Section */}
             <section
                 className="relative overflow-hidden text-white bg-center bg-cover"
-                style={{ backgroundImage: "url('/image/image2.jpg')" }}
+                style={{ backgroundImage: "url('/image/bg.jpg')" }}
             >
                 <div className="absolute inset-0 bg-gradient-to-br from-teal-600/80 via-teal-700/80 to-cyan-800/80"></div>
                 <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDE2YzAtMi4yMS0xLjc5LTQtNC00cy00IDEuNzktNCA0IDEuNzkgNCA0IDQgNC0xLjc5IDQtNHptLTggMGMwLTIuMjEtMS43OS00LTQtNHMtNCAxLjc5LTQgNCAxLjc5IDQgNCA0IDQtMS43OSA0LTR6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-20"></div>
@@ -132,9 +163,9 @@ function LandingPage() {
                     <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-4">
                             <img
-                                src="/Logo Surau Genesia.jpg"
+                                src={settings?.logo_url || "/Logo Surau Genesia.jpg"}
                                 alt="Surau Genesia"
-                                className="w-16 h-16 border-2 border-white rounded-full shadow-lg"
+                                className="w-16 h-16 border-2 border-white rounded-full shadow-lg object-cover"
                             />
                             <div>
                                 <h1 className="text-2xl font-bold">Surau Genesia</h1>
@@ -171,7 +202,7 @@ function LandingPage() {
                         </p>
 
                         <a
-                            href="https://api.whatsapp.com/send/?phone=6289531170313&text=Assalamualaikum+Kak%2C+Saya+tertarik+untuk+berdonasi+di+Surau+Genesia."
+                            href={`https://api.whatsapp.com/send/?phone=${settings?.phone?.replace(/\D/g, '') || '6289531170313'}&text=Assalamualaikum+Kak%2C+Saya+tertarik+untuk+berdonasi+di+Surau+Genesia.`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center px-10 py-5 space-x-2 text-lg font-bold text-white transition-all duration-300 rounded-full shadow-2xl bg-gradient-to-r from-green-400 to-emerald-500 hover:shadow-green-500/50 hover:scale-105 hover:from-green-500 hover:to-emerald-600"
@@ -252,9 +283,7 @@ function LandingPage() {
                                 </div>
                                 <h3 className="mb-6 text-3xl font-bold text-gray-800">Visi</h3>
                                 <p className="text-lg leading-relaxed text-gray-700">
-                                    Menjadi pusat pendidikan, sosial, dan peradaban yang
-                                    melahirkan generasi Islami, intelektual, dan berdaya
-                                    kepemimpinan global.
+                                    {settings?.vision || "Menjadi pusat pendidikan, sosial, dan peradaban yang melahirkan generasi Islami, intelektual, dan berdaya kepemimpinan global."}
                                 </p>
                             </div>
 
@@ -264,13 +293,13 @@ function LandingPage() {
                                 </div>
                                 <h3 className="mb-6 text-3xl font-bold text-gray-800">Misi</h3>
                                 <ul className="space-y-4">
-                                    {[
+                                    {(settings?.mission ? settings.mission.split('\n') : [
                                         "Menumbuhkan karakter keislaman yang kuat pada generasi muda",
                                         "Mengembangkan intelektualitas melalui pendidikan formal, non-formal, dan komunitas belajar",
                                         "Membangun kepemimpinan, kemandirian, dan kepedulian sosial",
                                         "Menjadi pusat sinergi kegiatan sosial, budaya, ekonomi, dan dakwah",
                                         "Mengelola wakaf dan Baitulmal secara transparan untuk kebermanfaatan masyarakat",
-                                    ].map((item, index) => (
+                                    ]).map((item, index) => (
                                         <li key={index} className="flex items-start space-x-3">
                                             <CheckCircle className="flex-shrink-0 w-5 h-5 mt-1 text-green-500" />
                                             <span className="leading-relaxed text-gray-700">
@@ -723,7 +752,7 @@ function LandingPage() {
 
                         <div className="mb-12">
                             <img
-                                src="/image/donasi.jpg"
+                                src={settings?.pamphlet_url || "/image/donasi.jpg"}
                                 alt="Donasi Surau Genesia"
                                 className="w-full shadow-lg rounded-2xl"
                             />
@@ -738,10 +767,10 @@ function LandingPage() {
                                     Donasi Tunai / Transfer
                                 </h3>
                                 <div className="space-y-3 text-gray-700">
-                                    <p className="font-semibold">Bank Syariah Indonesia</p>
-                                    <p>a.n. Baitul Maal Lampung Cerdas</p>
+                                    <p className="font-semibold">{settings?.bank_name || "Bank Syariah Indonesia"}</p>
+                                    <p>a.n. {settings?.bank_holder || "Baitul Maal Lampung Cerdas"}</p>
                                     <p className="px-4 py-3 font-mono font-bold text-white bg-green-500 border border-green-200 rounded-lg">
-                                        7328070116
+                                        {settings?.bank_number || "7328070116"}
                                     </p>
                                 </div>
                             </div>
@@ -758,7 +787,7 @@ function LandingPage() {
                                     <div className="space-y-3">
                                         <div className="flex items-center px-4 py-3 space-x-3 text-black bg-red-500 border border-teal-200 rounded-lg">
                                             <Phone className="w-5 h-5" />
-                                            <span className="font-bold">089531170313</span>
+                                            <span className="font-bold">{settings?.phone || "089531170313"}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -792,7 +821,7 @@ function LandingPage() {
 
                         <div className="text-center">
                             <a
-                                href="https://api.whatsapp.com/send/?phone=6289531170313&text=Assalamualaikum+Kak%2C+Saya+tertarik+untuk+berdonasi+di+Surau+Genesia."
+                                href={`https://api.whatsapp.com/send/?phone=${settings?.phone?.replace(/\D/g, '') || '6289531170313'}&text=Assalamualaikum+Kak%2C+Saya+tertarik+untuk+berdonasi+di+Surau+Genesia.`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="inline-flex items-center px-12 py-6 space-x-3 text-xl font-bold text-white transition-all duration-300 rounded-full shadow-2xl bg-gradient-to-r from-green-400 to-emerald-500 hover:shadow-green-500/50 hover:scale-105 hover:from-green-500 hover:to-emerald-600"
@@ -864,9 +893,9 @@ function LandingPage() {
                     <div className="max-w-4xl mx-auto text-center">
                         <div className="flex items-center justify-center mb-6 space-x-4">
                             <img
-                                src="/Logo Surau Genesia.jpg"
+                                src={settings?.logo_url || "/Logo Surau Genesia.jpg"}
                                 alt="Surau Genesia"
-                                className="w-12 h-12 rounded-full"
+                                className="w-12 h-12 rounded-full object-cover"
                             />
                             <div className="text-left">
                                 <h3 className="text-xl font-bold">Surau Genesia</h3>
@@ -877,12 +906,36 @@ function LandingPage() {
                             Pusat peradaban generasi muda yang taat, cerdas, dan visioner
                         </p>
                         <p className="mb-4 text-gray-400">
-                            Gg. Sawah Baru, Kp. Baru, Kec. Kedaton, Kota Bandar Lampung,
-                            Lampung 35141
+                            {settings?.address || "Gg. Sawah Baru, Kp. Baru, Kec. Kedaton, Kota Bandar Lampung, Lampung 35141"}
                         </p>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-gray-500 mb-6">
                             © 2025 Surau Genesia. Dikelola oleh Lampung Cerdas.
                         </p>
+
+                        {/* Social Media Links */}
+                        <div className="flex justify-center space-x-6">
+                            {settings?.instagram_url && (
+                                <a href={settings.instagram_url} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors">
+                                    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path fillRule="evenodd" d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 011.772 1.153 4.902 4.902 0 011.153 1.772c.247.636.416 1.363.465 2.427.048 1.067.06 1.407.06 4.123v.08c0 2.643-.012 2.987-.06 4.043-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-1.153 1.772 4.902 4.902 0 01-1.772 1.153c-.636.247-1.363.416-2.427.465-1.067.048-1.407.06-4.123.06h-.08c-2.643 0-2.987-.012-4.043-.06-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-1.772-1.153 4.902 4.902 0 01-1.153-1.772c-.247-.636-.416-1.363-.465-2.427-.047-1.024-.06-1.379-.06-3.808v-.63c0-2.43.013-2.784.06-3.808.049-1.064.218-1.791.465-2.427a4.902 4.902 0 011.153-1.772 4.902 4.902 0 011.772-1.153c.636-.247 1.363-.416 2.427-.465 1.067-.047 1.407-.06 4.123-.06h.08zm1.597 3.807c-1.676.995-2.056 3.011-1.06 4.687.995 1.676 3.011 2.056 4.687 1.06 1.676-.995 2.056-3.011 1.06-4.687-.995-1.676-3.011-2.056-4.687-1.06zm-4.322 1.954c.248-1.937 2.03-3.264 3.967-3.016 1.937.248 3.264 2.03 3.016 3.967-.248 1.937-2.03 3.264-3.967 3.016-1.937-.248-3.264-2.03-3.016-3.967zm-1.87-1.332c0 .552.448 1 1 1 .552 0 1-.448 1-1 0-.552-.448-1-1-1-.552 0-1 .448-1 1z" clipRule="evenodd" />
+                                    </svg>
+                                </a>
+                            )}
+                            {settings?.facebook_url && (
+                                <a href={settings.facebook_url} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors">
+                                    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path fillRule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clipRule="evenodd" />
+                                    </svg>
+                                </a>
+                            )}
+                            {settings?.youtube_url && (
+                                <a href={settings.youtube_url} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors">
+                                    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path fillRule="evenodd" d="M19.812 5.418c.861.23 1.538.907 1.768 1.768C21.998 8.746 22 12 22 12s0 3.255-.418 4.814a2.504 2.504 0 0 1-1.768 1.768c-1.56.419-7.814.419-7.814.419s-6.255 0-7.814-.419a2.505 2.505 0 0 1-1.768-1.768C2 15.255 2 12 2 12s0-3.254.418-4.814a2.506 2.506 0 0 1 1.768-1.768C5.744 5 11.998 5 11.998 5s6.255 0 7.814.418ZM15.194 12 10 15V9l5.194 3Z" clipRule="evenodd" />
+                                    </svg>
+                                </a>
+                            )}
+                        </div>
                     </div>
                 </div>
             </footer>
