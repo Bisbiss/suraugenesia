@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../../lib/supabaseClient";
-import { Plus, Trash2, Image as ImageIcon, Video, Loader2, ExternalLink, Eye, EyeOff } from "lucide-react";
+import { Plus, Trash2, Image as ImageIcon, Video, Loader2, ExternalLink, Eye, EyeOff, Edit } from "lucide-react";
 
 interface DocumentationItem {
     id: number;
@@ -22,6 +22,7 @@ const DocumentationManager = () => {
         is_active: true,
         type: 'image' as 'image' | 'video',
     });
+    const [editingId, setEditingId] = useState<number | null>(null);
     const [submitting, setSubmitting] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -72,10 +73,28 @@ const DocumentationManager = () => {
         }
     };
 
+    const handleEdit = (item: DocumentationItem) => {
+        setFormData({
+            title: item.title,
+            description: item.description || '',
+            is_active: item.is_active,
+            type: item.type,
+        });
+        setEditingId(item.id);
+        setIsModalOpen(true);
+    };
+
+    const closeModal = () => {
+        setIsModalOpen(false);
+        setFormData({ title: '', description: '', is_active: true, type: 'image' });
+        setSelectedFile(null);
+        setEditingId(null);
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!selectedFile) {
+        if (!selectedFile && !editingId) {
             alert('Please select a file to upload.');
             return;
         }
@@ -84,28 +103,50 @@ const DocumentationManager = () => {
         setUploading(true);
 
         try {
-            const url = await uploadFile(selectedFile);
+            let url = '';
 
-            const { error } = await supabase
-                .from('documentation_items')
-                .insert([{
+            if (selectedFile) {
+                url = await uploadFile(selectedFile);
+            }
+
+            if (editingId) {
+                // Update existing item
+                const updates: any = {
                     title: formData.title,
                     description: formData.description,
                     is_active: formData.is_active,
                     type: formData.type,
-                    url: url
-                }]);
+                };
+                if (url) updates.url = url;
 
-            if (error) throw error;
+                const { error } = await supabase
+                    .from('documentation_items')
+                    .update(updates)
+                    .eq('id', editingId);
 
-            alert('Data berhasil disimpan!');
-            setFormData({ title: '', description: '', is_active: true, type: 'image' });
-            setSelectedFile(null);
-            setIsModalOpen(false);
+                if (error) throw error;
+                alert('Data berhasil diperbarui!');
+            } else {
+                // Create new item
+                const { error } = await supabase
+                    .from('documentation_items')
+                    .insert([{
+                        title: formData.title,
+                        description: formData.description,
+                        is_active: formData.is_active,
+                        type: formData.type,
+                        url: url
+                    }]);
+
+                if (error) throw error;
+                alert('Data berhasil disimpan!');
+            }
+
+            closeModal();
             fetchItems();
         } catch (error: any) {
-            console.error('Error adding item:', error);
-            alert(`Error adding item: ${error.message || 'Unknown error'}`);
+            console.error('Error saving item:', error);
+            alert(`Error saving item: ${error.message || 'Unknown error'}`);
         } finally {
             setSubmitting(false);
             setUploading(false);
@@ -156,7 +197,11 @@ const DocumentationManager = () => {
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-2xl font-bold text-gray-800">Documentation Manager</h1>
                 <button
-                    onClick={() => setIsModalOpen(true)}
+                    onClick={() => {
+                        setEditingId(null);
+                        setFormData({ title: '', description: '', is_active: true, type: 'image' });
+                        setIsModalOpen(true);
+                    }}
                     className="flex items-center px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors"
                 >
                     <Plus className="w-5 h-5 mr-2" />
@@ -185,6 +230,13 @@ const DocumentationManager = () => {
                                         title={item.is_active ? "Nonaktifkan" : "Aktifkan"}
                                     >
                                         {item.is_active ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                    </button>
+                                    <button
+                                        onClick={() => handleEdit(item)}
+                                        className="p-2 bg-blue-500 rounded-full hover:bg-blue-600 text-white"
+                                        title="Edit"
+                                    >
+                                        <Edit className="w-5 h-5" />
                                     </button>
                                     <a
                                         href={item.url}
@@ -225,7 +277,7 @@ const DocumentationManager = () => {
             {isModalOpen && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
                     <div className="bg-white rounded-xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto">
-                        <h2 className="text-xl font-bold mb-4">Add Documentation</h2>
+                        <h2 className="text-xl font-bold mb-4">{editingId ? 'Edit Documentation' : 'Add Documentation'}</h2>
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
@@ -270,10 +322,10 @@ const DocumentationManager = () => {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Upload File</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Upload File {editingId && '(Only if changing file)'}</label>
                                 <input
                                     type="file"
-                                    required
+                                    required={!editingId}
                                     accept={formData.type === 'image' ? "image/*" : "video/*"}
                                     onChange={handleFileChange}
                                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
@@ -284,7 +336,7 @@ const DocumentationManager = () => {
                             <div className="flex justify-end gap-3 mt-6">
                                 <button
                                     type="button"
-                                    onClick={() => setIsModalOpen(false)}
+                                    onClick={closeModal}
                                     className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
                                 >
                                     Cancel
@@ -295,7 +347,7 @@ const DocumentationManager = () => {
                                     className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50 flex items-center"
                                 >
                                     {uploading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                                    {submitting ? 'Saving...' : 'Save Item'}
+                                    {submitting ? 'Saving...' : (editingId ? 'Update Item' : 'Save Item')}
                                 </button>
                             </div>
                         </form>
