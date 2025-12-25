@@ -10,6 +10,8 @@ import {
     Phone,
     FileText,
     ArrowRight,
+    X,
+    Maximize2
 } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "../lib/supabaseClient";
@@ -26,6 +28,8 @@ interface Agenda {
 interface DocumentationItem {
     id: number;
     title: string;
+    description?: string;
+    is_active: boolean;
     type: 'image' | 'video';
     url: string;
     created_at: string;
@@ -51,6 +55,7 @@ function LandingPage() {
     const [agendas, setAgendas] = useState<Agenda[]>([]);
     const [documentation, setDocumentation] = useState<DocumentationItem[]>([]);
     const [settings, setSettings] = useState<SiteSettings | null>(null);
+    const [selectedDoc, setSelectedDoc] = useState<DocumentationItem | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -95,16 +100,16 @@ function LandingPage() {
             const { data, error } = await supabase
                 .from("documentation_items")
                 .select("*")
-                .order("created_at", { ascending: false })
-                .limit(6);
+                .eq('is_active', true)
+                .order("created_at", { ascending: false });
 
             if (error) throw error;
-            console.log('Fetched documentation:', data);
             setDocumentation(data || []);
         } catch (error) {
             console.error("Error fetching documentation:", error);
         }
     };
+
 
     const fetchAgendas = async () => {
         try {
@@ -472,19 +477,27 @@ function LandingPage() {
                             {documentation.filter(i => i.type === 'image').length > 0 ? (
                                 <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
                                     {documentation.filter(i => i.type === 'image').map((item) => (
-                                        <div key={item.id} className="bg-white rounded-2xl shadow-lg overflow-hidden group">
-                                            <div className="aspect-video relative">
+                                        <div
+                                            key={item.id}
+                                            className="bg-white rounded-2xl shadow-lg overflow-hidden group hover:shadow-xl transition-all cursor-pointer"
+                                            onClick={() => setSelectedDoc(item)}
+                                        >
+                                            <div className="aspect-video relative overflow-hidden">
                                                 <img
                                                     src={item.url}
                                                     alt={item.title}
-                                                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                                                 />
-                                            </div>
-                                            {item.title && (
-                                                <div className="p-4">
-                                                    <h4 className="font-bold text-gray-800 mb-1">{item.title}</h4>
+                                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+                                                    <Maximize2 className="w-8 h-8 text-white drop-shadow-lg" />
                                                 </div>
-                                            )}
+                                            </div>
+                                            <div className="p-4">
+                                                <h4 className="font-bold text-gray-800 mb-1 line-clamp-1">{item.title}</h4>
+                                                {item.description && (
+                                                    <p className="text-sm text-gray-600 line-clamp-2">{item.description}</p>
+                                                )}
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
@@ -530,21 +543,37 @@ function LandingPage() {
                                 Video Dokumentasi
                             </h3>
                             {documentation.filter(i => i.type === 'video').length > 0 ? (
-                                <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+                                <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
                                     {documentation.filter(i => i.type === 'video').map((item) => (
-                                        <div key={item.id} className="bg-white rounded-2xl shadow-lg overflow-hidden">
-                                            <div className="aspect-video relative">
+                                        <div key={item.id} className="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col">
+                                            <div className="aspect-video relative bg-black">
                                                 <video
                                                     src={item.url}
-                                                    className="w-full h-full object-cover"
+                                                    className="w-full h-full object-contain"
                                                     controls
                                                 />
                                             </div>
-                                            {item.title && (
-                                                <div className="p-4">
-                                                    <h4 className="font-bold text-gray-800 mb-1">{item.title}</h4>
-                                                </div>
-                                            )}
+                                            <div className="p-4 flex-1">
+                                                <h4 className="font-bold text-gray-800 mb-2">{item.title}</h4>
+                                                {item.description && (
+                                                    <div>
+                                                        <p className={`text-gray-600 text-sm ${selectedDoc?.id === item.id ? '' : 'line-clamp-2'}`}>
+                                                            {item.description}
+                                                        </p>
+                                                        {item.description.length > 100 && (
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    setSelectedDoc(selectedDoc?.id === item.id ? null : item);
+                                                                }}
+                                                                className="text-teal-600 text-xs font-semibold mt-1 hover:underline focus:outline-none"
+                                                            >
+                                                                {selectedDoc?.id === item.id ? 'Sembunyikan' : 'Baca Selengkapnya'}
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
@@ -939,6 +968,43 @@ function LandingPage() {
                     </div>
                 </div>
             </footer>
+
+            {/* Modal for Images (Videos handle text expansion in-place for better UX) */}
+            {selectedDoc && selectedDoc.type === 'image' && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm"
+                    onClick={() => setSelectedDoc(null)}
+                >
+                    <div
+                        className="relative w-full max-w-4xl bg-white rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]"
+                        onClick={e => e.stopPropagation()}
+                    >
+                        <button
+                            onClick={() => setSelectedDoc(null)}
+                            className="absolute top-4 right-4 z-10 p-2 bg-black/50 hover:bg-black/70 rounded-full text-white transition-colors"
+                        >
+                            <X className="w-6 h-6" />
+                        </button>
+
+                        <div className="flex-1 bg-black flex items-center justify-center overflow-hidden">
+                            <img
+                                src={selectedDoc.url}
+                                alt={selectedDoc.title}
+                                className="w-full h-full object-contain max-h-[70vh]"
+                            />
+                        </div>
+
+                        <div className="p-6 md:p-8 overflow-y-auto bg-white">
+                            <h3 className="text-2xl font-bold text-gray-900 mb-2">{selectedDoc.title}</h3>
+                            {selectedDoc.description && (
+                                <p className="text-gray-700 leading-relaxed text-lg">
+                                    {selectedDoc.description}
+                                </p>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

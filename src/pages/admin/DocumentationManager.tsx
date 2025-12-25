@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../../lib/supabaseClient";
-import { Plus, Trash2, Image as ImageIcon, Video, Loader2, ExternalLink } from "lucide-react";
+import { Plus, Trash2, Image as ImageIcon, Video, Loader2, ExternalLink, Eye, EyeOff } from "lucide-react";
 
 interface DocumentationItem {
     id: number;
     title: string;
+    description?: string;
+    is_active: boolean;
     type: 'image' | 'video';
     url: string;
     created_at: string;
@@ -16,6 +18,8 @@ const DocumentationManager = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [formData, setFormData] = useState({
         title: '',
+        description: '',
+        is_active: true,
         type: 'image' as 'image' | 'video',
     });
     const [submitting, setSubmitting] = useState(false);
@@ -34,7 +38,6 @@ const DocumentationManager = () => {
                 .order('created_at', { ascending: false });
 
             if (error) throw error;
-            console.log('Fetched items:', data);
             setItems(data || []);
         } catch (error) {
             console.error('Error fetching documentation:', error);
@@ -59,10 +62,7 @@ const DocumentationManager = () => {
                 .from('documentation')
                 .upload(filePath, file);
 
-            if (uploadError) {
-                console.error('Supabase storage upload error:', uploadError);
-                throw uploadError;
-            }
+            if (uploadError) throw uploadError;
 
             const { data } = supabase.storage.from('documentation').getPublicUrl(filePath);
             return data.publicUrl;
@@ -90,17 +90,16 @@ const DocumentationManager = () => {
                 .from('documentation_items')
                 .insert([{
                     title: formData.title,
+                    description: formData.description,
+                    is_active: formData.is_active,
                     type: formData.type,
                     url: url
                 }]);
 
-            if (error) {
-                console.error('Supabase database insert error:', error);
-                throw error;
-            }
+            if (error) throw error;
 
             alert('Data berhasil disimpan!');
-            setFormData({ title: '', type: 'image' });
+            setFormData({ title: '', description: '', is_active: true, type: 'image' });
             setSelectedFile(null);
             setIsModalOpen(false);
             fetchItems();
@@ -113,11 +112,25 @@ const DocumentationManager = () => {
         }
     };
 
+    const toggleStatus = async (id: number, currentStatus: boolean) => {
+        try {
+            const { error } = await supabase
+                .from('documentation_items')
+                .update({ is_active: !currentStatus })
+                .eq('id', id);
+
+            if (error) throw error;
+            fetchItems(); // Refresh list
+        } catch (error) {
+            console.error('Error toggling status:', error);
+            alert('Gagal mengubah status');
+        }
+    };
+
     const handleDelete = async (id: number, url: string) => {
         if (!confirm('Are you sure you want to delete this item?')) return;
 
         try {
-            // Try to delete from storage if it's a storage URL
             if (url.includes('supabase.co/storage')) {
                 const path = url.split('/').pop();
                 if (path) {
@@ -158,14 +171,21 @@ const DocumentationManager = () => {
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {items.map((item) => (
-                        <div key={item.id} className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
+                        <div key={item.id} className={`bg-white rounded-xl shadow-md overflow-hidden border ${item.is_active ? 'border-gray-100' : 'border-red-200 bg-red-50'}`}>
                             <div className="aspect-video bg-gray-100 relative group">
                                 {item.type === 'image' ? (
-                                    <img src={item.url} alt={item.title} className="w-full h-full object-cover" />
+                                    <img src={item.url} alt={item.title} className={`w-full h-full object-cover ${!item.is_active && 'grayscale'}`} />
                                 ) : (
-                                    <video src={item.url} className="w-full h-full object-cover" controls />
+                                    <video src={item.url} className={`w-full h-full object-cover ${!item.is_active && 'grayscale'}`} controls />
                                 )}
                                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                    <button
+                                        onClick={() => toggleStatus(item.id, item.is_active)}
+                                        className={`p-2 rounded-full hover:bg-gray-100 ${item.is_active ? 'bg-yellow-100 text-yellow-600' : 'bg-green-100 text-green-600'}`}
+                                        title={item.is_active ? "Nonaktifkan" : "Aktifkan"}
+                                    >
+                                        {item.is_active ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                    </button>
                                     <a
                                         href={item.url}
                                         target="_blank"
@@ -185,9 +205,17 @@ const DocumentationManager = () => {
                                     {item.type === 'image' ? <ImageIcon className="w-3 h-3 mr-1" /> : <Video className="w-3 h-3 mr-1" />}
                                     {item.type}
                                 </div>
+                                {!item.is_active && (
+                                    <div className="absolute top-2 left-2 px-2 py-1 bg-red-500 rounded text-xs text-white uppercase font-bold">
+                                        Nonaktif
+                                    </div>
+                                )}
                             </div>
                             <div className="p-4">
                                 <h3 className="font-bold text-gray-800 mb-1">{item.title}</h3>
+                                {item.description && (
+                                    <p className="text-sm text-gray-500 line-clamp-2">{item.description}</p>
+                                )}
                             </div>
                         </div>
                     ))}
@@ -196,7 +224,7 @@ const DocumentationManager = () => {
 
             {isModalOpen && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-                    <div className="bg-white rounded-xl max-w-md w-full p-6">
+                    <div className="bg-white rounded-xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto">
                         <h2 className="text-xl font-bold mb-4">Add Documentation</h2>
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div>
@@ -208,6 +236,26 @@ const DocumentationManager = () => {
                                     onChange={e => setFormData({ ...formData, title: e.target.value })}
                                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                                 />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                                <textarea
+                                    value={formData.description}
+                                    onChange={e => setFormData({ ...formData, description: e.target.value })}
+                                    rows={3}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                                />
+                            </div>
+                            <div>
+                                <label className="flex items-center space-x-2 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={formData.is_active}
+                                        onChange={e => setFormData({ ...formData, is_active: e.target.checked })}
+                                        className="w-4 h-4 text-teal-600 rounded focus:ring-teal-500"
+                                    />
+                                    <span className="text-sm font-medium text-gray-700">Active / Tampilkan di Website</span>
+                                </label>
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
