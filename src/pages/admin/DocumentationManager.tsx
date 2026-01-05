@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../../lib/supabaseClient";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 import { Plus, Trash2, Image as ImageIcon, Video, Loader2, ExternalLink, Eye, EyeOff, Edit } from "lucide-react";
 
 interface DocumentationItem {
@@ -266,7 +268,9 @@ const DocumentationManager = () => {
                             <div className="p-4">
                                 <h3 className="font-bold text-gray-800 mb-1">{item.title}</h3>
                                 {item.description && (
-                                    <p className="text-sm text-gray-500 line-clamp-2">{item.description}</p>
+                                    <p className="text-sm text-gray-500 line-clamp-2">
+                                        {item.description.replace(/<[^>]+>/g, '')}
+                                    </p>
                                 )}
                             </div>
                         </div>
@@ -291,12 +295,14 @@ const DocumentationManager = () => {
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                                <textarea
-                                    value={formData.description}
-                                    onChange={e => setFormData({ ...formData, description: e.target.value })}
-                                    rows={3}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-                                />
+                                <div className="h-64 mb-12">
+                                    <ReactQuill
+                                        theme="snow"
+                                        value={formData.description}
+                                        onChange={(value) => setFormData({ ...formData, description: value })}
+                                        className="h-full"
+                                    />
+                                </div>
                             </div>
                             <div>
                                 <label className="flex items-center space-x-2 cursor-pointer">

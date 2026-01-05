@@ -495,7 +495,9 @@ function LandingPage() {
                                             <div className="p-4">
                                                 <h4 className="font-bold text-gray-800 mb-1 line-clamp-1">{item.title}</h4>
                                                 {item.description && (
-                                                    <p className="text-sm text-gray-600 line-clamp-2">{item.description}</p>
+                                                    <p className="text-sm text-gray-600 line-clamp-2">
+                                                        {item.description.replace(/<[^>]+>/g, '')}
+                                                    </p>
                                                 )}
                                             </div>
                                         </div>
@@ -557,10 +559,15 @@ function LandingPage() {
                                                 <h4 className="font-bold text-gray-800 mb-2">{item.title}</h4>
                                                 {item.description && (
                                                     <div>
-                                                        <p className={`text-gray-600 text-sm ${selectedDoc?.id === item.id ? '' : 'line-clamp-2'}`}>
-                                                            {item.description}
-                                                        </p>
-                                                        {item.description.length > 100 && (
+                                                        <div
+                                                            className={`text-gray-600 text-sm ${selectedDoc?.id === item.id ? 'prose prose-sm max-w-none' : 'line-clamp-2'}`}
+                                                            dangerouslySetInnerHTML={{
+                                                                __html: selectedDoc?.id === item.id
+                                                                    ? item.description
+                                                                    : item.description.replace(/<[^>]+>/g, '')
+                                                            }}
+                                                        />
+                                                        {item.description.replace(/<[^>]+>/g, '').length > 100 && (
                                                             <button
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
@@ -997,9 +1004,10 @@ function LandingPage() {
                         <div className="p-6 md:p-8 overflow-y-auto bg-white">
                             <h3 className="text-2xl font-bold text-gray-900 mb-2">{selectedDoc.title}</h3>
                             {selectedDoc.description && (
-                                <p className="text-gray-700 leading-relaxed text-lg">
-                                    {selectedDoc.description}
-                                </p>
+                                <div
+                                    className="text-gray-700 leading-relaxed text-lg prose prose-lg max-w-none"
+                                    dangerouslySetInnerHTML={{ __html: selectedDoc.description }}
+                                />
                             )}
                         </div>
                     </div>
