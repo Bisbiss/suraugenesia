@@ -14,6 +14,23 @@ interface DocumentationItem {
     created_at: string;
 }
 
+// Define Quill modules and formats
+const modules = {
+    toolbar: [
+        [{ 'header': [1, 2, false] }],
+        ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+        [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
+        ['link', 'clean']
+    ],
+};
+
+const formats = [
+    'header',
+    'bold', 'italic', 'underline', 'strike', 'blockquote',
+    'list', 'bullet', 'indent',
+    'link'
+];
+
 const DocumentationManager = () => {
     const [items, setItems] = useState<DocumentationItem[]>([]);
     const [loading, setLoading] = useState(true);
@@ -295,12 +312,14 @@ const DocumentationManager = () => {
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                                <div className="h-64 mb-12">
+                                <div className="mb-12">
                                     <ReactQuill
                                         theme="snow"
                                         value={formData.description}
-                                        onChange={(value) => setFormData({ ...formData, description: value })}
-                                        className="h-full"
+                                        onChange={(value) => setFormData(prev => ({ ...prev, description: value }))}
+                                        modules={modules}
+                                        formats={formats}
+                                        className="bg-white h-64"
                                     />
                                 </div>
                             </div>
