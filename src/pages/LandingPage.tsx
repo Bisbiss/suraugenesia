@@ -290,9 +290,8 @@ function LandingPage() {
 						</p>
 
 						<a
-							href={`https://api.whatsapp.com/send/?phone=${
-								settings?.phone?.replace(/\D/g, "") || "6289531170313"
-							}&text=Assalamualaikum+Kak%2C+Saya+tertarik+untuk+berdonasi+di+Surau+Genesia.`}
+							href={`https://api.whatsapp.com/send/?phone=${settings?.phone?.replace(/\D/g, "") || "6289531170313"
+								}&text=Assalamualaikum+Kak%2C+Saya+tertarik+untuk+berdonasi+di+Surau+Genesia.`}
 							target="_blank"
 							rel="noopener noreferrer"
 							className="inline-flex items-center px-10 py-5 space-x-2 text-lg font-bold text-white transition-all duration-300 rounded-full shadow-2xl bg-gradient-to-r from-green-400 to-emerald-500 hover:shadow-green-500/50 hover:scale-105 hover:from-green-500 hover:to-emerald-600"
@@ -417,12 +416,12 @@ function LandingPage() {
 									{(settings?.mission
 										? settings.mission.split("\n")
 										: [
-												"Menumbuhkan karakter keislaman yang kuat pada generasi muda",
-												"Mengembangkan intelektualitas melalui pendidikan formal, non-formal, dan komunitas belajar",
-												"Membangun kepemimpinan, kemandirian, dan kepedulian sosial",
-												"Menjadi pusat sinergi kegiatan sosial, budaya, ekonomi, dan dakwah",
-												"Mengelola wakaf dan Baitulmal secara transparan untuk kebermanfaatan masyarakat",
-										  ]
+											"Menumbuhkan karakter keislaman yang kuat pada generasi muda",
+											"Mengembangkan intelektualitas melalui pendidikan formal, non-formal, dan komunitas belajar",
+											"Membangun kepemimpinan, kemandirian, dan kepedulian sosial",
+											"Menjadi pusat sinergi kegiatan sosial, budaya, ekonomi, dan dakwah",
+											"Mengelola wakaf dan Baitulmal secara transparan untuk kebermanfaatan masyarakat",
+										]
 									).map((item, index) => (
 										<li key={index} className="flex items-start space-x-3">
 											<CheckCircle className="flex-shrink-0 w-5 h-5 mt-1 text-green-500" />
@@ -690,37 +689,36 @@ function LandingPage() {
 													{item.description && (
 														<div>
 															<div
-																className={`text-gray-600 text-sm ${
-																	selectedDoc?.id === item.id
+																className={`text-gray-600 text-sm ${selectedDoc?.id === item.id
 																		? "prose prose-sm max-w-none"
 																		: "line-clamp-2"
-																}`}
+																	}`}
 																dangerouslySetInnerHTML={{
 																	__html:
 																		selectedDoc?.id === item.id
 																			? item.description
 																			: item.description.replace(
-																					/<[^>]+>/g,
-																					""
-																			  ),
+																				/<[^>]+>/g,
+																				""
+																			),
 																}}
 															/>
 															{item.description.replace(/<[^>]+>/g, "").length >
 																100 && (
-																<button
-																	onClick={(e) => {
-																		e.stopPropagation();
-																		setSelectedDoc(
-																			selectedDoc?.id === item.id ? null : item
-																		);
-																	}}
-																	className="mt-1 text-xs font-semibold text-teal-600 hover:underline focus:outline-none"
-																>
-																	{selectedDoc?.id === item.id
-																		? "Sembunyikan"
-																		: "Baca Selengkapnya"}
-																</button>
-															)}
+																	<button
+																		onClick={(e) => {
+																			e.stopPropagation();
+																			setSelectedDoc(
+																				selectedDoc?.id === item.id ? null : item
+																			);
+																		}}
+																		className="mt-1 text-xs font-semibold text-teal-600 hover:underline focus:outline-none"
+																	>
+																		{selectedDoc?.id === item.id
+																			? "Sembunyikan"
+																			: "Baca Selengkapnya"}
+																	</button>
+																)}
 														</div>
 													)}
 												</div>
@@ -1058,9 +1056,8 @@ function LandingPage() {
 
 						<div className="text-center">
 							<a
-								href={`https://api.whatsapp.com/send/?phone=${
-									settings?.phone?.replace(/\D/g, "") || "6289531170313"
-								}&text=Assalamualaikum+Kak%2C+Saya+tertarik+untuk+berdonasi+di+Surau+Genesia.`}
+								href={`https://api.whatsapp.com/send/?phone=${settings?.phone?.replace(/\D/g, "") || "6289531170313"
+									}&text=Assalamualaikum+Kak%2C+Saya+tertarik+untuk+berdonasi+di+Surau+Genesia.`}
 								target="_blank"
 								rel="noopener noreferrer"
 								className="inline-flex items-center px-12 py-6 space-x-3 text-xl font-bold text-white transition-all duration-300 rounded-full shadow-2xl bg-gradient-to-r from-green-400 to-emerald-500 hover:shadow-green-500/50 hover:scale-105 hover:from-green-500 hover:to-emerald-600"
@@ -1149,7 +1146,7 @@ function LandingPage() {
 								"Gg. Sawah Baru, Kp. Baru, Kec. Kedaton, Kota Bandar Lampung, Lampung 35141"}
 						</p>
 						<p className="mb-6 text-sm text-gray-500">
-							© 2025 Surau Genesia. Dikelola oleh Lampung Cerdas.
+							© {new Date().getFullYear()} Surau Genesia. Dikelola oleh Lampung Cerdas.
 						</p>
 
 						{/* Social Media Links */}
