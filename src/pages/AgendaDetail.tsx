@@ -136,7 +136,7 @@ const AgendaDetail = () => {
             <div className="container mx-auto px-6 mt-10 relative z-10">
                 <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12 max-w-4xl mx-auto">
                     <div
-                        className="prose prose-lg max-w-none prose-headings:text-gray-800 prose-p:text-gray-600 prose-a:text-teal-600 hover:prose-a:text-teal-700"
+                        className="prose prose-lg max-w-none prose-headings:text-gray-800 prose-p:text-gray-600 prose-p:leading-snug prose-p:my-1 prose-a:text-teal-600 hover:prose-a:text-teal-700"
                         dangerouslySetInnerHTML={{ __html: agenda.content }}
                     />
 

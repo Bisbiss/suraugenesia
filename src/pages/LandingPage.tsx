@@ -690,8 +690,8 @@ function LandingPage() {
 														<div>
 															<div
 																className={`text-gray-600 text-sm ${selectedDoc?.id === item.id
-																		? "prose prose-sm max-w-none"
-																		: "line-clamp-2"
+																	? "prose prose-sm max-w-none"
+																	: "line-clamp-2"
 																	}`}
 																dangerouslySetInnerHTML={{
 																	__html:
@@ -847,7 +847,7 @@ function LandingPage() {
 													{agenda.title}
 												</h3>
 												<div
-													className="mb-4 text-sm prose-sm prose text-gray-600 line-clamp-3"
+													className="mb-4 text-sm prose-sm prose text-gray-600 line-clamp-3 prose-p:leading-snug prose-p:my-1"
 													dangerouslySetInnerHTML={{ __html: agenda.content }}
 												/>
 												<div className="flex items-center justify-between pt-4 mt-auto border-t border-gray-100">

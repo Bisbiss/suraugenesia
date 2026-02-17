@@ -110,7 +110,7 @@ const AgendaList = () => {
                                         })}
                                     </div>
                                     <div
-                                        className="text-gray-600 text-sm mb-4 line-clamp-3 prose prose-sm"
+                                        className="text-gray-600 text-sm mb-4 line-clamp-3 prose prose-sm prose-p:leading-snug prose-p:my-1"
                                         dangerouslySetInnerHTML={{ __html: agenda.content }}
                                     />
                                     <div className="mt-auto pt-4 border-t border-gray-100">
