@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Calendar, LogOut, Image, Settings, Menu, X } from "lucide-react";
+import { LayoutDashboard, Calendar, LogOut, Image, Settings, Menu, X, Link as LinkIcon } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
 import { useEffect, useState } from "react";
 import { User } from "@supabase/supabase-js";
@@ -94,6 +94,15 @@ const AdminLayout = () => {
                     >
                         <Settings className="w-5 h-5" />
                         <span>Pengaturan</span>
+                    </Link>
+
+                    <Link
+                        to="/admin/direct-links"
+                        onClick={() => setIsSidebarOpen(false)}
+                        className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${isActive('/admin/direct-links')}`}
+                    >
+                        <LinkIcon className="w-5 h-5" />
+                        <span>Direct Links</span>
                     </Link>
                 </nav>
 

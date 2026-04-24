@@ -9,6 +9,8 @@ import SiteSettingsManager from "./pages/admin/SiteSettingsManager";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AgendaList from "./pages/AgendaList";
 import AgendaDetail from "./pages/AgendaDetail";
+import DirectLinkManager from "./pages/admin/DirectLinkManager";
+import LinkRedirect from "./pages/LinkRedirect";
 
 function App() {
 	return (
@@ -33,7 +35,11 @@ function App() {
 					<Route path="agenda" element={<AgendaManager />} />
 					<Route path="documentation" element={<DocumentationManager />} />
 					<Route path="settings" element={<SiteSettingsManager />} />
+					<Route path="direct-links" element={<DirectLinkManager />} />
 				</Route>
+
+				{/* Catch-all route for Direct Links */}
+				<Route path="/:slug" element={<LinkRedirect />} />
 			</Routes>
 		</Router>
 	);
